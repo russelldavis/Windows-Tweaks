@@ -1,3 +1,5 @@
+7z := "c:\Program Files\7-Zip\7z.exe"
+
 path = %1%
 EnvGet userDir, USERPROFILE
 SplitPath path, file, , ext, fileNoExt 
@@ -15,7 +17,11 @@ if (FileExist(destPath)) {
 FileCopy %path%, %destPath%
 FileCreateDir %destDir%
 
-RunWait "c:\Program Files\7-Zip\7z.exe" x %destPath%, %destDir%
+if (RegExMatch(file, ".*\.(tgz|tar(-\d+)?\.gz)$")) { ;Match tar-X.gz to include automatically renamed tar.gz files (for duplicate downloads)
+  RunWait %comspec% /c ""%7z%" x -so "%destPath%" | "%7z%" x -si -ttar", %destDir%
+} else {
+  RunWait %7z% x %destPath%, %destDir%
+}
 FileRecycle %destPath%
 
 Run %destDir%
